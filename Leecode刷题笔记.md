@@ -3096,3 +3096,169 @@
 
   - 时间复杂度：O(N)，其中 N 是树的节点数。对每个节点访问一次。
   - 空间复杂度：O(N)，其中 N 是树的节点数。空间复杂度主要取决于队列的开销，队列中的元素个数不会超过树的节点数。
+
+## day29
+
+#### [112. 路径总和](https://leetcode.cn/problems/path-sum/)
+
+- 题目
+
+  给你二叉树的根节点 `root` 和一个表示目标和的整数 `targetSum` 。判断该树中是否存在 **根节点到叶子节点** 的路径，这条路径上所有节点值相加等于目标和 `targetSum` 。如果存在，返回 `true` ；否则，返回 `false` 。
+
+  **叶子节点** 是指没有子节点的节点。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/01/18/pathsum1.jpg)
+
+  ```
+  输入：root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+  输出：true
+  解释：等于目标和的根节点到叶节点路径如上图所示。
+  ```
+
+  **示例 2：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/01/18/pathsum2.jpg)
+
+  ```
+  输入：root = [1,2,3], targetSum = 5
+  输出：false
+  解释：树中存在两条根节点到叶子节点的路径：
+  (1 --> 2): 和为 3
+  (1 --> 3): 和为 4
+  不存在 sum = 5 的根节点到叶子节点的路径。
+  ```
+
+  **示例 3：**
+
+  ```
+  输入：root = [], targetSum = 0
+  输出：false
+  解释：由于树是空的，所以不存在根节点到叶子节点的路径。
+  ```
+
+   
+
+  **提示：**
+
+  - 树中节点的数目在范围 `[0, 5000]` 内
+  - `-1000 <= Node.val <= 1000`
+  - `-1000 <= targetSum <= 1000`
+
+- 解法
+
+  **写在前面**
+
+  注意到本题的要求是，询问是否有从「根节点」到某个「叶子节点」经过的路径上的节点之和等于目标和。核心思想是对树进行一次遍历，在遍历时记录从根节点到当前节点的路径和，以防止重复计算。
+
+  > 需要特别注意的是，给定的 `root` 可能为空。
+
+  **方法一：广度优先搜索**
+
+  **思路及算法**
+
+  首先我们可以想到使用广度优先搜索的方式，记录从根节点到当前节点的路径和，以防止重复计算。
+
+  这样我们使用两个队列，分别存储将要遍历的节点，以及根节点到这些节点的路径和即可。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public boolean hasPathSum(TreeNode root, int sum) {
+          if (root == null) {
+              return false;
+          }
+          Queue<TreeNode> queNode = new LinkedList<>();
+          Queue<Integer> queVal = new LinkedList<>();
+          queNode.offer(root);
+          queVal.offer(root.val);
+          while (!queNode.isEmpty()) {
+              TreeNode now = queNode.poll();
+              int temp = queVal.poll();
+              if (now.left == null && now.right == null) {
+                  if (temp == sum) {
+                      return true;
+                  }
+                  continue;
+              }
+              if (now.left != null) {
+                  queNode.offer(now.left);
+                  queVal.offer(now.left.val + temp);
+              }
+              if (now.right != null) {
+                  queNode.offer(now.right);
+                  queVal.offer(now.right.val + temp);
+              }
+          }
+          return false;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(N)，其中 N 是树的节点数。对每个节点访问一次。
+  - 空间复杂度：O(N)，其中 N 是树的节点数。空间复杂度主要取决于队列的开销，队列中的元素个数不会超过树的节点数。
+
+  ##### **方法二：递归**
+
+  **思路及算法**
+
+  观察要求我们完成的函数，我们可以归纳出它的功能：询问是否存在从当前节点 `root` 到叶子节点的路径，满足其路径和为 `sum`。
+
+  假定从根节点到当前节点的值之和为 `val`，我们可以将这个大问题转化为一个小问题：是否存在从当前节点的子节点到叶子的路径，满足其路径和为 `sum - val`。
+
+  不难发现这满足递归的性质，若当前节点就是叶子节点，那么我们直接判断 `sum` 是否等于 `val` 即可（因为路径和已经确定，就是当前节点的值，我们只需要判断该路径和是否满足条件）。若当前节点不是叶子节点，我们只需要递归地询问它的子节点是否能满足条件即可。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public boolean hasPathSum(TreeNode root, int sum) {
+          if (root == null) {
+              return false;
+          }
+          if (root.left == null && root.right == null) {
+              return sum == root.val;
+          }
+          return hasPathSum(root.left, sum - root.val) || hasPathSum(root.right, sum - root.val);
+      }
+  }
+  // 或者：正向思维，遍历二叉树，将到达叶子节点的路径和累加与 targetSum 比较，如果相等就返回true
+  class Solution {
+      public boolean hasPathSum(TreeNode root, int targetSum) {
+          return doSome(root,targetSum,0);
+      }
+  
+      public boolean doSome(TreeNode root,int targetSum,int tmp){
+          if (root==null) return false;
+          // 叶子节点
+          if(root.left==null&&root.right==null) {
+              if(tmp+root.val==targetSum){
+                  return true;
+              } else {
+                  tmp=0;
+                  return false;
+              }
+          }
+          if(root.left!=null) {
+              boolean l =doSome(root.left,targetSum,tmp+root.val);
+              if (l) return true;
+          }
+          if(root.right!=null) {
+              boolean r = doSome(root.right,targetSum,tmp+root.val);
+              if (r) return true;
+          }
+          return false;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(N)，其中 N 是树的节点数。对每个节点访问一次。
+  - 空间复杂度：O(H)，其中 H 是树的高度。空间复杂度主要取决于递归时栈空间的开销，最坏情况下，树呈现链状，空间复杂度为 O(N)。平均情况下树的高度与节点数的对数正相关，空间复杂度为 O(log N)。
