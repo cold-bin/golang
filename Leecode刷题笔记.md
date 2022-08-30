@@ -3428,3 +3428,100 @@
     因此总时间复杂度是 O(h^2^)。由于完全二叉树满足 2^h^≤n<2^h+1^，因此有 O(h)=O(log n)，O(h^2^)=O(log^2^ n)。
   - 空间复杂度：O(1)。只需要维护有限的额外空间。
 
+## day31
+
+#### [226. 翻转二叉树](https://leetcode.cn/problems/invert-binary-tree/)
+
+- 题目
+
+  给你一棵二叉树的根节点 `root` ，翻转这棵二叉树，并返回其根节点。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/03/14/invert1-tree.jpg)
+
+  ```
+  输入：root = [4,2,7,1,3,6,9]
+  输出：[4,7,2,9,6,3,1]
+  ```
+
+  **示例 2：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/03/14/invert2-tree.jpg)
+
+  ```
+  输入：root = [2,1,3]
+  输出：[2,3,1]
+  ```
+
+  **示例 3：**
+
+  ```
+  输入：root = []
+  输出：[]
+  ```
+
+   
+
+  **提示：**
+
+  - 树中节点数目范围在 `[0, 100]` 内
+  - `-100 <= Node.val <= 100`
+
+- 解法
+
+  **方法一：深度优先遍历**
+
+  **思路与算法**
+
+  这是一道很经典的二叉树问题。显然，我们从根节点开始，递归地对树进行遍历，并从叶子节点先开始翻转。如果当前遍历到的节点 root 的左右两棵子树都已经翻转，那么我们只需要交换两棵子树的位置，即可完成以 root 为根节点的整棵子树的翻转。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public TreeNode invertTree(TreeNode root) {
+          if (root == null) {
+              return null;
+          }
+          TreeNode left = invertTree(root.left);
+          TreeNode right = invertTree(root.right);
+          root.left = right;
+          root.right = left;
+          return root;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(N)，其中 N 为二叉树节点的数目。我们会遍历二叉树中的每一个节点，对每个节点而言，我们在常数时间内交换其两棵子树。
+  - 空间复杂度：O(N)。使用的空间由递归栈的深度决定，它等于当前节点在二叉树中的高度。在平均情况下，二叉树的高度与节点个数为对数关系，即 O*(logN)。而在最坏情况下，树形成链状，空间复杂度为 O(N)。
+
+  **方法二：广度优先遍历**
+
+  ```java
+      public TreeNode invertTree(TreeNode root) {
+          if (root == null)
+              return root;
+          Queue<TreeNode> queue = new LinkedList<>();
+          queue.add(root);//相当于把数据加入到队列尾部
+          while (!queue.isEmpty()) {
+              //poll方法相当于移除队列头部的元素
+              TreeNode node = queue.poll();
+              //先交换子节点
+              TreeNode left = node.left;
+              node.left = node.right;
+              node.right = left;
+              if (node.left != null)
+                  queue.add(node.left);
+              if (node.right != null)
+                  queue.add(node.right);
+          }
+          return root;
+      }
+  ```
+
+  
