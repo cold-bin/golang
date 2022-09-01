@@ -3696,3 +3696,140 @@
 
   - 时间复杂度：O(N)，其中 N 是二叉树的节点数。二叉树的所有节点有且只会被访问一次，从 `p` 和 `q` 节点往上跳经过的祖先节点个数不会超过 N，因此总的时间复杂度为 O(N)。
   - 空间复杂度：O(N) ，其中 N 是二叉树的节点数。递归调用的栈深度取决于二叉树的高度，二叉树最坏情况下为一条链，此时高度为 N，因此空间复杂度为 O(N)，哈希表存储每个节点的父节点也需要 O(N) 的空间复杂度，因此最后总的空间复杂度为 O(N)。
+
+## day33
+
+#### [257. 二叉树的所有路径](https://leetcode.cn/problems/binary-tree-paths/)
+
+- 题目
+
+  给你一个二叉树的根节点 `root` ，按 **任意顺序** ，返回所有从根节点到叶子节点的路径。
+
+  **叶子节点** 是指没有子节点的节点。
+
+  
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/03/12/paths-tree.jpg)
+
+  ```
+  输入：root = [1,2,3,null,5]
+  输出：["1->2->5","1->3"]
+  ```
+
+  **示例 2：**
+
+  ```
+  输入：root = [1]
+  输出：["1"]
+  ```
+
+   
+
+  **提示：**
+
+  - 树中节点的数目在范围 `[1, 100]` 内
+  - `-100 <= Node.val <= 100`
+
+- 解法
+
+  **方法一：深度优先搜索**
+
+  **思路与算法**
+
+  最直观的方法是使用深度优先搜索。在深度优先搜索遍历二叉树时，我们需要考虑当前的节点以及它的孩子节点。
+
+  - 如果当前节点**不是叶子节点**，则在当前的路径末尾添加该节点，并继续递归遍历该节点的每一个孩子节点。
+  - 如果当前节点**是叶子节点**，则在当前路径末尾添加该节点后我们就得到了一条从根节点到叶子节点的路径，将该路径加入到答案即可。
+
+  如此，当遍历完整棵二叉树以后我们就得到了所有从根节点到叶子节点的路径。当然，深度优先搜索也可以使用非递归的方式实现，这里不再赘述。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public List<String> binaryTreePaths(TreeNode root) {
+          List<String> paths = new ArrayList<String>();
+          constructPaths(root, "", paths);
+          return paths;
+      }
+  
+      public void constructPaths(TreeNode root, String path, List<String> paths) {
+          if (root != null) {
+              StringBuffer pathSB = new StringBuffer(path);
+              pathSB.append(Integer.toString(root.val));
+              if (root.left == null && root.right == null) {  // 当前节点是叶子节点
+                  paths.add(pathSB.toString());  // 把路径加入到答案中
+              } else {
+                  pathSB.append("->");  // 当前节点不是叶子节点，继续递归遍历
+                  constructPaths(root.left, pathSB.toString(), paths);
+                  constructPaths(root.right, pathSB.toString(), paths);
+              }
+          }
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(N^2^)，其中 N 表示节点数目。在深度优先搜索中每个节点会被访问一次且只会被访问一次，每一次会对 `path` 变量进行拷贝构造，时间代价为 O(N) ，故时间复杂度为 O(N^2^)。
+
+  - 空间复杂度：O(N^2^)，其中 N 表示节点数目。除答案数组外我们需要考虑递归调用的栈空间。在最坏情况下，当二叉树中每个节点只有一个孩子节点时，即整棵二叉树呈一个链状，此时递归的层数为 N，此时每一层的 `path` 变量的空间代价的总和为
+    $$
+    O(\sum_{i = 1}^{N} i) = O(N^2)
+    $$
+     空间复杂度为 O(N^2^)。最好情况下，当二叉树为平衡二叉树时，它的高度为 log N ，此时空间复杂度为 
+    $$
+    O((\log {N})^2)
+    $$
+    。
+
+  **方法二：广度优先搜索**
+
+  **思路与算法**
+
+  我们也可以用广度优先搜索来实现。我们维护一个队列，存储节点以及根到该节点的路径。一开始这个队列里只有根节点。在每一步迭代中，我们取出队列中的首节点，如果它**是叶子节点**，则将它对应的路径加入到答案中。如果它**不是叶子节点**，则将它的所有孩子节点加入到队列的末尾。当队列为空时广度优先搜索结束，我们即能得到答案。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public List<String> binaryTreePaths(TreeNode root) {
+          List<String> paths = new ArrayList<String>();
+          if (root == null) {
+              return paths;
+          }
+          Queue<TreeNode> nodeQueue = new LinkedList<TreeNode>();
+          Queue<String> pathQueue = new LinkedList<String>();
+  
+          nodeQueue.offer(root);
+          pathQueue.offer(Integer.toString(root.val));
+  
+          while (!nodeQueue.isEmpty()) {
+              TreeNode node = nodeQueue.poll(); 
+              String path = pathQueue.poll();
+  
+              if (node.left == null && node.right == null) {
+                  paths.add(path);
+              } else {
+                  if (node.left != null) {
+                      nodeQueue.offer(node.left);
+                      pathQueue.offer(new StringBuffer(path).append("->").append(node.left.val).toString());
+                  }
+  
+                  if (node.right != null) {
+                      nodeQueue.offer(node.right);
+                      pathQueue.offer(new StringBuffer(path).append("->").append(node.right.val).toString());
+                  }
+              }
+          }
+          return paths;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(N^2^)，其中 N 表示节点数目。分析同方法一。
+  - 空间复杂度：O(N^2^)，其中 N 表示节点数目。在最坏情况下，队列中会存在 N 个节点，保存字符串的队列中每个节点的最大长度为 N，故空间复杂度为 O(N^2^)。
