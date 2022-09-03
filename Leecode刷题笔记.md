@@ -3833,3 +3833,114 @@
 
   - 时间复杂度：O(N^2^)，其中 N 表示节点数目。分析同方法一。
   - 空间复杂度：O(N^2^)，其中 N 表示节点数目。在最坏情况下，队列中会存在 N 个节点，保存字符串的队列中每个节点的最大长度为 N，故空间复杂度为 O(N^2^)。
+
+## day34
+
+#### [404. 左叶子之和](https://leetcode.cn/problems/sum-of-left-leaves/)
+
+- 题目
+
+  给定二叉树的根节点 `root` ，返回所有左叶子之和。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/04/08/leftsum-tree.jpg)
+
+  ```
+  输入: root = [3,9,20,null,null,15,7] 
+  输出: 24 
+  解释: 在这个二叉树中，有两个左叶子，分别是 9 和 15，所以返回 24
+  ```
+
+  **示例 2:**
+
+  ```
+  输入: root = [1]
+  输出: 0
+  ```
+
+   
+
+  **提示:**
+
+  - 节点数在 `[1, 1000]` 范围内
+  - `-1000 <= Node.val <= 1000`
+
+- 解法
+
+  一个节点为「左叶子」节点，当且仅当它是某个节点的左子节点，并且它是一个叶子结点。因此我们可以考虑对整棵树进行遍历，当我们遍历到节点 node 时，如果它的左子节点是一个叶子结点，那么就将它的左子节点的值累加计入答案。
+
+  遍历整棵树的方法有深度优先搜索和广度优先搜索，下面分别给出了实现代码。
+
+  **方法一：深度优先搜索**
+
+  ```java
+  class Solution {
+      public int sumOfLeftLeaves(TreeNode root) {
+          return root != null ? dfs(root) : 0;
+      }
+  
+      public int dfs(TreeNode node) {
+          int ans = 0;
+          if (node.left != null) {
+              ans += isLeafNode(node.left) ? node.left.val : dfs(node.left);
+          }
+          if (node.right != null && !isLeafNode(node.right)) {
+              ans += dfs(node.right);
+          }
+          return ans;
+      }
+  
+      public boolean isLeafNode(TreeNode node) {
+          return node.left == null && node.right == null;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n)，其中 n 是树中的节点个数。
+  - 空间复杂度：O(n)。空间复杂度与深度优先搜索使用的栈的最大深度相关。在最坏的情况下，树呈现链式结构，深度为 O(n)，对应的空间复杂度也为 O(n)。
+
+  **方法二：广度优先搜索**
+
+  ```java
+  class Solution {
+      public int sumOfLeftLeaves(TreeNode root) {
+          if (root == null) {
+              return 0;
+          }
+  
+          Queue<TreeNode> queue = new LinkedList<TreeNode>();
+          queue.offer(root);
+          int ans = 0;
+          while (!queue.isEmpty()) {
+              TreeNode node = queue.poll();
+              if (node.left != null) {
+                  if (isLeafNode(node.left)) {
+                      ans += node.left.val;
+                  } else {
+                      queue.offer(node.left);
+                  }
+              }
+              if (node.right != null) {
+                  if (!isLeafNode(node.right)) {
+                      queue.offer(node.right);
+                  }
+              }
+          }
+          return ans;
+      }
+  
+      public boolean isLeafNode(TreeNode node) {
+          return node.left == null && node.right == null;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n) ，其中 n 是树中的节点个数。
+  - 空间复杂度：O(n) 。空间复杂度与广度优先搜索使用的队列需要的容量相关，为 O(n)。
