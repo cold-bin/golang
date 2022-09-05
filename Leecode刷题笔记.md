@@ -3944,3 +3944,110 @@
 
   - 时间复杂度：O(n) ，其中 n 是树中的节点个数。
   - 空间复杂度：O(n) 。空间复杂度与广度优先搜索使用的队列需要的容量相关，为 O(n)。
+
+## day35
+
+#### [513. 找树左下角的值](https://leetcode.cn/problems/find-bottom-left-tree-value/)
+
+- 题目
+
+  给定一个二叉树的 **根节点** `root`，请找出该二叉树的 **最底层 最左边** 节点的值。
+
+  假设二叉树中至少有一个节点。
+
+   
+
+  **示例 1:**
+
+  ![img](https://assets.leetcode.com/uploads/2020/12/14/tree1.jpg)
+
+  ```
+  输入: root = [2,1,3]
+  输出: 1
+  ```
+
+  **示例 2:**
+
+  ![img](https://assets.leetcode.com/uploads/2020/12/14/tree2.jpg)
+
+  ```
+  输入: [1,2,3,4,null,5,6,null,null,7]
+  输出: 7
+  ```
+
+   
+
+  **提示:**
+
+  - 二叉树的节点个数的范围是 `[1,104]`
+  - `-231 <= Node.val <= 231 - 1` 
+
+- 解法
+
+  **方法一：深度优先搜索**
+
+  使用 `height` 记录遍历到的节点的高度，`curVal` 记录高度在 `curHeight` 的最左节点的值。在深度优先搜索时，我们先搜索当前节点的左子节点，再搜索当前节点的右子节点，然后判断当前节点的高度 `height` 是否大于 `curHeight`，如果是，那么将 `curVal` 设置为当前结点的值,`curHeight` 设置为 `height`。
+
+  > 因为我们先遍历左子树，然后再遍历右子树，所以对同一高度的所有节点，最左节点肯定是最先被遍历到的。
+
+  ```java
+  class Solution {
+      int curVal = 0;
+      int curHeight = 0;
+  
+      public int findBottomLeftValue(TreeNode root) {
+          int curHeight = 0;
+          dfs(root, 0);
+          return curVal;
+      }
+  
+      public void dfs(TreeNode root, int height) {
+          if (root == null) {
+              return;
+          }
+          height++;
+          dfs(root.left, height);
+          dfs(root.right, height);
+          // 相当于后续遍历麻，最先遍历的一定是左子节点，然后是右、根子节点
+          if (height > curHeight) {
+              curHeight = height;
+              curVal = root.val;
+          }
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n)，其中 n 是二叉树的节点数目。需要遍历 n 个节点。
+  - 空间复杂度：O(n)。递归栈需要占用 O(n) 的空间。
+
+  **方法二：广度优先搜索**
+
+  使用广度优先搜索遍历每一层的节点。在遍历一个节点时，需要先把它的非空右子节点放入队列，然后再把它的非空左子节点放入队列，这样才能保证从右到左遍历每一层的节点。广度优先搜索所遍历的最后一个节点的值就是最底层最左边节点的值。
+
+  ```java
+  class Solution {
+      public int findBottomLeftValue(TreeNode root) {
+          int ret = 0;
+          Queue<TreeNode> queue = new ArrayDeque<TreeNode>();
+          queue.offer(root);
+          while (!queue.isEmpty()) {
+              TreeNode p = queue.poll();
+              if (p.right != null) {
+                  queue.offer(p.right);
+              }
+              if (p.left != null) {
+                  queue.offer(p.left);
+              }
+              ret = p.val;
+          }
+          return ret;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n)，其中 n 是二叉树的节点数目。
+  - 空间复杂度：O(n)。如果二叉树是满完全二叉树，那么队列 q 最多保存 `2/n` 个节点。
