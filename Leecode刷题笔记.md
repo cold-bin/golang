@@ -4308,3 +4308,196 @@
 
   - 时间复杂度：O(min(m,n))，其中 m 和 n 分别是两个二叉树的节点个数。对两个二叉树同时进行广度优先搜索，只有当两个二叉树中的对应节点都不为空时才会访问到该节点，因此被访问到的节点数不会超过较小的二叉树的节点数。
   - 空间复杂度：O(min(m,n))，其中 m 和 n 分别是两个二叉树的节点个数。空间复杂度取决于队列中的元素个数，队列中的元素个数不会超过较小的二叉树的节点数。
+
+## day38
+
+#### [654. 最大二叉树](https://leetcode.cn/problems/maximum-binary-tree/)
+
+- 题目
+
+  给定一个不重复的整数数组 `nums` 。 **最大二叉树** 可以用下面的算法从 `nums` 递归地构建:
+
+  1. 创建一个根节点，其值为 `nums` 中的最大值。
+  2. 递归地在最大值 **左边** 的 **子数组前缀上** 构建左子树。
+  3. 递归地在最大值 **右边** 的 **子数组后缀上** 构建右子树。
+
+  返回 *`nums` 构建的* ***最大二叉树\*** 。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2020/12/24/tree1.jpg)
+
+  ```
+  输入：nums = [3,2,1,6,0,5]
+  输出：[6,3,5,null,2,0,null,null,1]
+  解释：递归调用如下所示：
+  - [3,2,1,6,0,5] 中的最大值是 6 ，左边部分是 [3,2,1] ，右边部分是 [0,5] 。
+      - [3,2,1] 中的最大值是 3 ，左边部分是 [] ，右边部分是 [2,1] 。
+          - 空数组，无子节点。
+          - [2,1] 中的最大值是 2 ，左边部分是 [] ，右边部分是 [1] 。
+              - 空数组，无子节点。
+              - 只有一个元素，所以子节点是一个值为 1 的节点。
+      - [0,5] 中的最大值是 5 ，左边部分是 [0] ，右边部分是 [] 。
+          - 只有一个元素，所以子节点是一个值为 0 的节点。
+          - 空数组，无子节点。
+  ```
+
+  **示例 2：**
+
+  ![img](https://assets.leetcode.com/uploads/2020/12/24/tree2.jpg)
+
+  ```
+  输入：nums = [3,2,1]
+  输出：[3,null,2,null,1]
+  ```
+
+   
+
+  **提示：**
+
+  - `1 <= nums.length <= 1000`
+  - `0 <= nums[i] <= 1000`
+  - `nums` 中的所有整数 **互不相同**
+
+- 解法
+
+  **方法一：递归**
+
+  **思路与算法**
+
+  最简单的方法是直接按照题目描述进行模拟。
+
+  我们用递归函数 construct(nums,left,right)  表示对数组 nums 中从 nums 到  的元素构建一棵树。我们首先找到这一区间中的最大值，记为 nums 中从 nums[best]，这样就确定了根节点的值。随后我们就可以进行递归：
+
+  - 左子树为 construct(nums, left, best-1)；
+  - 右子树为 construct(nums,best+1,right)。
+
+  当递归到一个无效的区间（即 left*>*right）时，便可以返回一棵空的树。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public TreeNode constructMaximumBinaryTree(int[] nums) {
+          return construct(nums, 0, nums.length - 1);
+      }
+  
+      public TreeNode construct(int[] nums, int left, int right) {
+          if (left > right) {
+              return null;
+          }
+          int best = left;
+          for (int i = left + 1; i <= right; ++i) {
+              if (nums[i] > nums[best]) {
+                  best = i;
+              }
+          }
+          TreeNode node = new TreeNode(nums[best]);
+          node.left = construct(nums, left, best - 1);
+          node.right = construct(nums, best + 1, right);
+          return node;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n^2^)，其中 n 是数组 nums 的长度。在最坏的情况下，数组严格递增或递减，需要递归 n 层，第 i (0≤i<n) 层需要遍历 n-i 个元素以找出最大值，总时间复杂度为 O(n^2^)。
+  - 空间复杂度：O(n)，即为最坏情况下需要使用的栈空间。
+
+  **方法二：单调栈**
+
+  **思路与算法**
+
+  我们可以将题目中构造树的过程等价转换为下面的构造过程：
+
+  - 初始时，我们只有一个根节点，其中存储了整个数组；
+  - 在每一步操作中，我们可以「任选」一个存储了超过一个数的节点，找出其中的最大值并存储在该节点。最大值左侧的数组部分下放到该节点的左子节点，右侧的数组部分下放到该节点的右子节点；
+  - 如果所有的节点都恰好存储了一个数，那么构造结束。
+
+  由于最终构造出的是一棵树，因此无需按照题目的要求「递归」地进行构造，而是每次可以「任选」一个节点进行构造。这里可以类比一棵树的「深度优先搜索」和「广度优先搜索」，二者都可以起到遍历整棵树的效果。
+
+  既然可以任意进行选择，那么我们不妨每次选择数组中最大值**最大**的那个节点进行构造。这样一来，我们就可以保证按照数组中元素降序排序的顺序依次构造每个节点。因此：
+
+  > 当我们选择的节点中数组的最大值为 nums[i] 时，所有大于 nums[i] 的元素已经被构造过（即被单独放入某一个节点中），所有小于 nums[i] 的元素还没有被构造过。
+
+  这就说明：
+
+  > 在最终构造出的树上，以 nums[i] 为根节点的子树，在原数组中对应的区间，左边界为 nums[i] 左侧第一个比它大的元素所在的位置，右边界为 nums[i] 右侧第一个比它大的元素所在的位置。左右边界均为开边界。
+  >
+  > 如果某一侧边界不存在，则那一侧边界为数组的边界。如果两侧边界均不存在，说明其为最大值，即根节点。
+
+  并且：
+
+  > nums[i] 的父结点是两个边界中较小的那个元素对应的节点。
+
+  因此，我们的任务变为：找出每一个元素左侧和右侧第一个比它大的元素所在的位置。这就是一个经典的单调栈问题了，可以参考 [503. 下一个更大元素 II](https://leetcode.cn/problems/next-greater-element-ii/)。如果左侧的元素较小，那么该元素就是左侧元素的右子节点；如果右侧的元素较小，那么该元素就是右侧元素的左子节点。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public TreeNode constructMaximumBinaryTree(int[] nums) {
+          int n = nums.length;
+          Deque<Integer> stack = new ArrayDeque<Integer>();
+          int[] left = new int[n];
+          int[] right = new int[n];
+          Arrays.fill(left, -1);
+          Arrays.fill(right, -1);
+          TreeNode[] tree = new TreeNode[n];
+          for (int i = 0; i < n; ++i) {
+              tree[i] = new TreeNode(nums[i]);
+              while (!stack.isEmpty() && nums[i] > nums[stack.peek()]) {
+                  right[stack.pop()] = i;
+              }
+              if (!stack.isEmpty()) {
+                  left[i] = stack.peek();
+              }
+              stack.push(i);
+          }
+  
+          TreeNode root = null;
+          for (int i = 0; i < n; ++i) {
+              if (left[i] == -1 && right[i] == -1) {
+                  root = tree[i];
+              } else if (right[i] == -1 || (left[i] != -1 && nums[left[i]] < nums[right[i]])) {
+                  tree[left[i]].right = tree[i];
+              } else {
+                  tree[right[i]].left = tree[i];
+              }
+          }
+          return root;
+      }
+  }
+  ```
+
+  我们还可以把最后构造树的过程放进单调栈求解的步骤中，省去用来存储左右边界的数组。下面的代码理解起来较为困难，同一个节点的左右子树会被多次赋值，读者可以仔细品味其妙处所在。
+
+  ```java
+  class Solution {
+      public TreeNode constructMaximumBinaryTree(int[] nums) {
+          int n = nums.length;
+          List<Integer> stack = new ArrayList<Integer>();
+          TreeNode[] tree = new TreeNode[n];
+          for (int i = 0; i < n; ++i) {
+              tree[i] = new TreeNode(nums[i]);
+              while (!stack.isEmpty() && nums[i] > nums[stack.get(stack.size() - 1)]) {
+                  tree[i].left = tree[stack.get(stack.size() - 1)];
+                  stack.remove(stack.size() - 1);
+              }
+              if (!stack.isEmpty()) {
+                  tree[stack.get(stack.size() - 1)].right = tree[i];
+              }
+              stack.add(i);
+          }
+          return tree[stack.get(0)];
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n)，其中 n 是数组 nums 的长度。单调栈求解左右边界和构造树均需要 O(n) 的时间。
+  - 空间复杂度：O(n)，即为单调栈和数组 tree 需要使用的空间。
