@@ -122,7 +122,6 @@ func main() {
 		fmt.Println(selection.Text())
 	})
 }
-123456789101112131415161718
 ```
 
 以上示例，可以把`div`元素筛选出来，而`body`,`span`并不会被筛选。
@@ -151,7 +150,6 @@ func main() {
 		fmt.Println(selection.Text())
 	})
 }
-12345678910111213141516171819
 ```
 
 ### `Element ID` 选择器
@@ -178,7 +176,6 @@ func main() {
 		fmt.Println(selection.Text())
 	})
 }
-12345678910111213141516171819
 ```
 
 如果有相同的`ID`，但是它们又分别属于不同的`HTML`元素怎么办？有好办法，和`Element`结合起来。比如我们筛选元素为`div`,并且`id`是`div1`的元素，就可以使用`Find(div#div1)`这样的筛选器进行筛选。
@@ -187,8 +184,9 @@ func main() {
 
 ### `Class`选择器
 
-```
 class`也是`HTML`中常用的属性，我们可以通过`class`选择器来快速的筛选需要的`HTML`元素，它的用法和ID选择器类似，为`Find(".class")。
+
+```go
 func main() {
 	html := `<body>
 
@@ -208,7 +206,6 @@ func main() {
 		fmt.Println(selection.Text())
 	})
 }
-12345678910111213141516171819
 ```
 
 以上示例中，就筛选出来`class`为`name`的这个`div`元素。
@@ -241,7 +238,6 @@ func main() {
 		fmt.Println(selection.Text())
 	})
 }
-12345678910111213141516171819
 ```
 
 示例中我们通过`div[class]`这个选择器，筛选出`Element`为`div`并且有`class`这个属性的，所以第一个`div`没有被筛选到。
@@ -249,10 +245,9 @@ func main() {
 刚刚上面这个示例是采用是否存在某个属性为筛选器，同理，我们可以筛选出属性为某个值的元素。
 
 ```go
-    dom.Find("div[class=name]").Each(func(i int, selection *goquery.Selection) {
-		fmt.Println(selection.Text())
-	})
-123
+dom.Find("div[class=name]").Each(func(i int, selection *goquery.Selection) {
+	fmt.Println(selection.Text())
+})
 ```
 
 这样我们就可以筛选出class这个属性值为name的div元素。
@@ -276,7 +271,7 @@ func main() {
 `示例`
 
 ```go
-	func main() {
+func main() {
 	//spiderTop250()
 	//spoderMoiveInfo("https://movie.douban.com/subject/3011235/")
 	html := `<body>
@@ -323,7 +318,6 @@ func main() {
 		fmt.Println(selection.Text())
 	})
 }
-12345678910111213141516171819202122
 ```
 
 以上示例，筛选出`body`这个父元素下，符合条件的最直接的子元素`div`，结果是`DIV1、DIV2、DIV3`，虽然`DIV4`也是`body`的子元素，但不是一级的，所以不会被筛选到。
@@ -331,10 +325,9 @@ func main() {
 那么问题来了，我就是想把`DIV4`也筛选出来怎么办?就是要筛选`body`下所有的`div`元素，不管是一级、二级还是N级。有办法的，`goquery`考虑到了，只需要把`大于号(>)`改为`空格`就好了。比如上面的例子，改为如下选择器即可。
 
 ```go
-    dom.Find("body div").Each(func(i int, selection *goquery.Selection) {
-		fmt.Println(selection.Text())
-	})
-123
+dom.Find("body div").Each(func(i int, selection *goquery.Selection) {
+	fmt.Println(selection.Text())
+})
 ```
 
 ### `prev+next`相邻选择器
@@ -377,10 +370,9 @@ func main() {
 有相邻就有兄弟，兄弟选择器就不一定要求相邻了，只要他们共有一个父元素就可以。
 
 ```go
-	dom.Find("div[lang=zh]~p").Each(func(i int, selection *goquery.Selection) {
-		fmt.Println(selection.Text())
-	})
-123
+dom.Find("div[lang=zh]~p").Each(func(i int, selection *goquery.Selection) {
+	fmt.Println(selection.Text())
+})
 ```
 
 刚刚的例子，只需要把`+号`换成`~号`,就可以把`P2`也筛选出来，因为`P2、P1和DIV1`都是兄弟。
@@ -392,30 +384,28 @@ func main() {
 有时候我们使用选择器选择出来后后，希望再过滤一下，这时候就用到过滤器了，过滤器有很多，我们先讲内容过滤器这一种。
 
 ```go
-	dom.Find("div:contains(DIV2)").Each(func(i int, selection *goquery.Selection) {
-		fmt.Println(selection.Text())
-	})
-123
+dom.Find("div:contains(DIV2)").Each(func(i int, selection *goquery.Selection) {
+	fmt.Println(selection.Text())
+})
 ```
 
-`Find(":contains(text)")`表示筛选出的元素要包含指定的文本，我们例子中要求选择出的`div`元素要包含`DIV2`文本，那么只有一个`DIV2`元素满足要求。
+`Find(":contains(text)")`表示筛选出的元素要包含指定的**文本**，我们例子中要求选择出的`div`元素要包含`DIV2`文本，那么只有一个`DIV2`元素满足要求。
 
 此外还有`Find(":empty")`表示筛选出的元素都不能有子元素（包括文本元素），只筛选那些不包含任何子元素的元素。
 
 `Find(":has(selector)")`和`contains`差不多，只不过这个是包含的是元素节点。
 
 ```go
-    dom.Find("span:has(div)").Each(func(i int, selection *goquery.Selection) {
-		fmt.Println(selection.Text())
-	})
-123
+dom.Find("span:has(div)").Each(func(i int, selection *goquery.Selection) {
+	fmt.Println(selection.Text())
+})
 ```
 
 以上示例表示筛选出`包含div元素的span节点。`
 
 ### `:first-child`过滤器
 
-`:first-child过滤器`，语法为`Find(":first-child")`，表示筛选出的元素要是他们的父元素的第一个子元素，如果不是，则不会被筛选出来。
+`:first-child过滤器`，语法为`Find(":first-child")`，表示筛选出的元素，要是他们的父元素的第一个子元素，如果不是，则不会被筛选出来。
 
 ```go
 func main() {
@@ -552,10 +542,9 @@ func main() {
 		fmt.Println(selection.Html())
 	})
 }
-12345678910111213141516171819
 ```
 
-示例中`DIV5`就可以被筛选出来，因为它是它的父元素`span`达到唯一子元素，但`DIV1`就不是，所以不能呗筛选出来。
+示例中`DIV5`就可以被筛选出来，因为它是它的父元素`span`达到唯一子元素，但`DIV1`就不是，所以不能被筛选出来。
 
 ### `:only-of-type` 过滤器
 
