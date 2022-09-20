@@ -5980,3 +5980,91 @@ BFS 遍历是一类很值得反复体会和练习的题目。一方面，BFS 遍
 - [LeetCode 310. Minimum Height Trees](https://leetcode-cn.com/problems/minimum-height-trees/)
 
 经过了本文的讲解，相信解决这些题目也不是难事。
+
+## day45
+
+#### [107. 二叉树的层序遍历 II](https://leetcode.cn/problems/binary-tree-level-order-traversal-ii/)
+
+- 题目
+
+  给你二叉树的根节点 `root` ，返回其节点值 **自底向上的层序遍历** 。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/02/19/tree1.jpg)
+
+  ```
+  输入：root = [3,9,20,null,null,15,7]
+  输出：[[15,7],[9,20],[3]]
+  ```
+
+  **示例 2：**
+
+  ```
+  输入：root = [1]
+  输出：[[1]]
+  ```
+
+  **示例 3：**
+
+  ```
+  输入：root = []
+  输出：[]
+  ```
+
+   
+
+  **提示：**
+
+  - 树中节点数目在范围 `[0, 2000]` 内
+  - `-1000 <= Node.val <= 1000`
+
+- 解法
+
+  **解法一：无脑广度优先**
+
+  在前面一题的思路上，转换一下：只需要在添加当层遍历list时，插入头部即可。
+
+  [题解](https://leetcode.cn/problems/binary-tree-level-order-traversal-ii/solution/er-cha-shu-de-ceng-ci-bian-li-ii-by-leetcode-solut/)
+
+  **解法二：不优雅的深度优先遍历**
+
+  将上题设深度优先产生的序列反序即可。
+
+  ```java
+  class Solution {
+      void level(TreeNode root, int index, List<List<Integer>> res) {
+          // 当前行对应的列表不存在，加一个空列表
+          if(res.size() < index) {
+              res.add(new ArrayList<Integer>());
+          }
+          // 将当前节点的值加入当前行的 res 中
+          res.get(index-1).add(root.val);
+          // 递归处理左子树
+          if(root.left != null) {
+              level(root.left, index+1, res);
+          }
+          // 递归处理右子树
+          if(root.right != null) {
+              level(root.right, index+1, res);
+          }
+      }
+      public List<List<Integer>> levelOrderBottom(TreeNode root) {
+          if(root == null) {
+              return new ArrayList<List<Integer>>();
+          }
+  
+          List<List<Integer>> list = new ArrayList<List<Integer>>();
+          List<List<Integer>> res = new ArrayList<List<Integer>>();
+          level(root, 1, list);
+          for(int i = list.size()-1; i >= 0; i--){
+              res.add(list.get(i));
+          }
+          return res;
+      }
+  }
+  ```
+
+  
