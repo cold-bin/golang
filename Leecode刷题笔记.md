@@ -7600,3 +7600,132 @@ BFS 遍历是一类很值得反复体会和练习的题目。一方面，BFS 遍
 
   - 时间复杂度：O(n)，其中 n 为二叉树的结点数目。最多访问 n 个结点。
   - 空间复杂度：O(1)。
+
+## day56
+
+#### [701. 二叉搜索树中的插入操作](https://leetcode.cn/problems/insert-into-a-binary-search-tree/)
+
+- 题目
+
+  给定二叉搜索树（BST）的根节点 `root` 和要插入树中的值 `value` ，将值插入二叉搜索树。 返回插入后二叉搜索树的根节点。 输入数据 **保证** ，新值和原始二叉搜索树中的任意节点值都不同。
+
+  **注意**，可能存在多种有效的插入方式，只要树在插入后仍保持为二叉搜索树即可。 你可以返回 **任意有效的结果** 。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2020/10/05/insertbst.jpg)
+
+  ```
+  输入：root = [4,2,7,1,3], val = 5
+  输出：[4,2,7,1,3,5]
+  解释：另一个满足题目要求可以通过的树是：
+  ```
+
+  **示例 2：**
+
+  ```
+  输入：root = [40,20,60,10,30,50,70], val = 25
+  输出：[40,20,60,10,30,50,70,null,null,25]
+  ```
+
+  **示例 3：**
+
+  ```
+  输入：root = [4,2,7,1,3,null,null,null,null,null,null], val = 5
+  输出：[4,2,7,1,3,5]
+  ```
+
+   
+
+  **提示：**
+
+  - 树中的节点数将在 `[0, 104]`的范围内。
+  - `-108 <= Node.val <= 108`
+  - 所有值 `Node.val` 是 **独一无二** 的。
+  - `-108 <= val <= 108`
+  - **保证** `val` 在原始BST中不存在。
+
+- 解法
+
+  **方法一：模拟**
+
+  **思路与算法**
+
+  首先回顾二叉搜索树的性质：对于任意节点 root 而言，左子树（如果存在）上所有节点的值均小于 root.val，右子树（如果存在）上所有节点的值均大于 root.val，且它们都是二叉搜索树。
+
+  因此，当将 val 插入到以 root 为根的子树上时，根据 val 与 root.val 的大小关系，就可以确定要将 val 插入到哪个子树中。
+
+  - 如果该子树不为空，则问题转化成了将 val 插入到对应子树上。
+  - 否则，在此处新建一个以 val 为值的节点，并链接到其父节点 root 上。
+
+  **代码**
+
+  ```java
+  class Solution {
+      public TreeNode insertIntoBST(TreeNode root, int val) {
+          if (root == null) {
+              return new TreeNode(val);
+          }
+          TreeNode pos = root;
+          while (pos != null) {
+              if (val < pos.val) {
+                  if (pos.left == null) {
+                      pos.left = new TreeNode(val);
+                      break;
+                  } else {
+                      pos = pos.left;
+                  }
+              } else {
+                  if (pos.right == null) {
+                      pos.right = new TreeNode(val);
+                      break;
+                  } else {
+                      pos = pos.right;
+                  }
+              }
+          }
+          return root;
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(N)，其中 N 为树中节点的数目。最坏情况下，我们需要将值插入到树的最深的叶子结点上，而叶子节点最深为 O(N)。
+  - 空间复杂度：O(1)。我们只使用了常数大小的空间。
+
+  **方法二：递归**、
+
+  我们知道二叉搜索树插入新的节点时，如果还要满足BST性质，那么还有一种简单得思路：直接遍历到何时得叶子节点，插入到叶子节点末尾即可。
+
+  ```java
+  class Solution {
+      TreeNode parent = null;
+      int flag = 0;
+      // 二叉排序树插入节点，一定可以插入到叶子节点
+      public TreeNode insertIntoBST(TreeNode root, int val) {
+          if(root==null) {
+              if(flag == -1){
+                  return new TreeNode(val);
+              }else{
+                  return new TreeNode(val);
+              }
+          }
+          if(val>root.val){
+              parent = root;
+              flag = 1;
+              root.right = insertIntoBST(root.right,val);
+          } else if(val<root.val){
+              parent = root;
+              flag = -1;
+              root.left = insertIntoBST(root.left,val);
+          }
+  
+          return root;
+      }
+  }
+  ```
+
+  
