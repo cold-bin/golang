@@ -7729,3 +7729,164 @@ BFS 遍历是一类很值得反复体会和练习的题目。一方面，BFS 遍
   ```
 
   
+
+## day57
+
+#### [110. 平衡二叉树](https://leetcode.cn/problems/balanced-binary-tree/)
+
+- 题目
+
+  给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+  本题中，一棵高度平衡二叉树定义为：
+
+  > 一个二叉树*每个节点* 的左右两个子树的高度差的绝对值不超过 1 。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2020/10/06/balance_1.jpg)
+
+  ```
+  输入：root = [3,9,20,null,null,15,7]
+  输出：true
+  ```
+
+  **示例 2：**
+
+  ![img](https://assets.leetcode.com/uploads/2020/10/06/balance_2.jpg)
+
+  ```
+  输入：root = [1,2,2,3,3,null,null,4,4]
+  输出：false
+  ```
+
+  **示例 3：**
+
+  ```
+  输入：root = []
+  输出：true
+  ```
+
+   
+
+  **提示：**
+
+  - 树中的节点数在范围 `[0, 5000]` 内
+  - `-104 <= Node.val <= 104`
+
+- 解法
+
+  **前言**
+
+  这道题中的平衡二叉树的定义是：二叉树的每个节点的左右子树的高度差的绝对值不超过 1，则二叉树是平衡二叉树。根据定义，一棵二叉树是平衡二叉树，当且仅当其所有子树也都是平衡二叉树，因此可以使用递归的方式判断二叉树是不是平衡二叉树，递归的顺序可以是自顶向下或者自底向上。
+
+  **方法一：自顶向下的递归**
+
+  定义函数 height，用于计算二叉树中的任意一个节点 p 的高度：
+  $$
+  \texttt{height}(p) = \begin{cases} 0 & p \text{ 是空节点}\\ \max(\texttt{height}(p.\textit{left}), \texttt{height}(p.\textit{right}))+1 & p \text{ 是非空节点} \end{cases}
+  $$
+  有了计算节点高度的函数，即可判断二叉树是否平衡。具体做法类似于二叉树的前序遍历，即对于当前遍历到的节点，首先计算左右子树的高度，如果左右子树的高度差是否不超过 1，再分别递归地遍历左右子节点，并判断左子树和右子树是否平衡。这是一个自顶向下的递归的过程。
+
+  ```java
+  class Solution {
+      public boolean isBalanced(TreeNode root) {
+          if (root == null) {
+              return true;
+          } else {
+              return Math.abs(height(root.left) - height(root.right)) <= 1 && isBalanced(root.left) && isBalanced(root.right);
+          }
+      }
+  
+      public int height(TreeNode root) {
+          if (root == null) {
+              return 0;
+          } else {
+              return Math.max(height(root.left), height(root.right)) + 1;
+          }
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n^2)，其中 n 是二叉树中的节点个数。
+    最坏情况下，二叉树是满二叉树，需要遍历二叉树中的所有节点，时间复杂度是 O(n)。
+    对于节点 p，如果它的高度是 d，则 height(p) 最多会被调用 d 次（即遍历到它的每一个祖先节点时）。对于平均的情况，一棵树的高度 h 满足 O(h)=O(logn)，因为 d*≤*h，所以总时间复杂度为 O(nlog n)。对于最坏的情况，二叉树形成链式结构，高度为 O(n)，此时总时间复杂度为 O(n^2)。
+  - 空间复杂度：O(n)，其中 n 是二叉树中的节点个数。空间复杂度主要取决于递归调用的层数，递归调用的层数不会超过 n。
+
+  **方法二：自底向上的递归**
+
+  方法一由于是自顶向下递归，因此对于同一个节点，函数 height 会被重复调用，导致时间复杂度较高。如果使用自底向上的做法，则对于每个节点，函数 height 只会被调用一次。
+
+  自底向上递归的做法类似于后序遍历，对于当前遍历到的节点，先递归地判断其左右子树是否平衡，再判断以当前节点为根的子树是否平衡。如果一棵子树是平衡的，则返回其高度（高度一定是非负整数），否则返回 -1。如果存在一棵子树不平衡，则整个二叉树一定不平衡。
+
+  ```java
+  class Solution {
+      public boolean isBalanced(TreeNode root) {
+          return height(root) >= 0;
+      }
+  
+      public int height(TreeNode root) {
+          if (root == null) {
+              return 0;
+          }
+          int leftHeight = height(root.left);
+          int rightHeight = height(root.right);
+          if (leftHeight == -1 || rightHeight == -1 || Math.abs(leftHeight - rightHeight) > 1) {
+              return -1;
+          } else {
+              return Math.max(leftHeight, rightHeight) + 1;
+          }
+      }
+  }
+  ```
+
+  **复杂度分析**
+
+  - 时间复杂度：O(n)，其中 n 是二叉树中的节点个数。使用自底向上的递归，每个节点的计算高度和判断是否平衡都只需要处理一次，最坏情况下需要遍历二叉树中的所有节点，因此时间复杂度是 O(n)。
+  - 空间复杂度：O(n)，其中 n 是二叉树中的节点个数。空间复杂度主要取决于递归调用的层数，递归调用的层数不会超过 n。
+
+## day58
+
+#### [1382. 将二叉搜索树变平衡](https://leetcode.cn/problems/balance-a-binary-search-tree/)
+
+- 题目
+
+  给你一棵二叉搜索树，请你返回一棵 **平衡后** 的二叉搜索树，新生成的树应该与原来的树有着相同的节点值。如果有多种构造方法，请你返回任意一种。
+
+  如果一棵二叉搜索树中，每个节点的两棵子树高度差不超过 `1` ，我们就称这棵二叉搜索树是 **平衡的** 。
+
+   
+
+  **示例 1：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/08/10/balance1-tree.jpg)
+
+  ```
+  输入：root = [1,null,2,null,3,null,4,null,null]
+  输出：[2,1,3,null,null,null,4]
+  解释：这不是唯一的正确答案，[3,1,4,null,2,null,null] 也是一个可行的构造方案。
+  ```
+
+  **示例 2：**
+
+  ![img](https://assets.leetcode.com/uploads/2021/08/10/balanced2-tree.jpg)
+
+  ```
+  输入: root = [2,1,3]
+  输出: [2,1,3]
+  ```
+
+   
+
+  **提示：**
+
+  - 树节点的数目在 `[1, 104]` 范围内。
+  - `1 <= Node.val <= 105`
+
+- 解法
+
+  - [贪心构造](https://leetcode.cn/problems/balance-a-binary-search-tree/solution/jiang-er-cha-sou-suo-shu-bian-ping-heng-by-leetcod/)
