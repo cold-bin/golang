@@ -7974,3 +7974,79 @@ BFS 遍历是一类很值得反复体会和练习的题目。一方面，BFS 遍
 - 解法
 
   https://leetcode.cn/problems/repeated-substring-pattern/solution/zhong-fu-de-zi-zi-fu-chuan-by-leetcode-solution/
+
+## day61
+
+#### [50. Pow(x, n)](https://leetcode.cn/problems/powx-n/)
+
+- 题目
+
+  实现 [pow(*x*, *n*)](https://www.cplusplus.com/reference/valarray/pow/) ，即计算 `x` 的整数 `n` 次幂函数（即，`xn` ）。
+
+   
+
+  **示例 1：**
+
+  ```
+  输入：x = 2.00000, n = 10
+  输出：1024.00000
+  ```
+
+  **示例 2：**
+
+  ```
+  输入：x = 2.10000, n = 3
+  输出：9.26100
+  ```
+
+  **示例 3：**
+
+  ```
+  输入：x = 2.00000, n = -2
+  输出：0.25000
+  解释：2-2 = 1/22 = 1/4 = 0.25
+  ```
+
+   
+
+  **提示：**
+
+  - `-100.0 < x < 100.0`
+  - `-231 <= n <= 231-1`
+  - `-104 <= xn <= 104`
+
+- 解法
+
+  使用暴力迭代和暴力递归均会爆栈或超时
+
+  ```java
+  // 递归求解爆栈   
+  public double myPow(double x, int n) {
+      if(n==0) return 1.0;
+      else if(n>0) return myPow(x,n-1)*x;
+      else return myPow(x,n+1)*(1.0/x);
+  }
+  // 迭代超时
+  public double myPow(double x, int n) {
+      if(n==0) return 1.0;
+      else if(n>0) {
+      	double r=x;
+      	for(int i=0;i<n-1;i++){
+          	r=r*x;
+      	}
+      return r;
+      }else {
+           double r=(1.0/x);
+           for(int i=0;i<-n-1;i++){
+               r =r*(1.0/x);
+           }
+           return r;
+          }
+  }
+  ```
+
+  **方法一：快速幂+递归**
+
+  **方法二：快速幂+迭代**
+
+  https://leetcode.cn/problems/powx-n/solution/powx-n-by-leetcode-solution/
